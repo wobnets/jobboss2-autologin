@@ -86,6 +86,14 @@ try:
 except Exception as e:
     print("The header did not become clickable within 10 seconds.")
 
+try:
+    header_spacer = WebDriverWait(driver, 10).until(
+        EC.element_to_be_clickable((By.ID, "st-header-spacer"))
+    )
+    driver.execute_script("arguments[0].style.display = 'none';", header_spacer)
+except Exception as e:
+    print("The header spacer did not become clickable within 10 seconds.")
+
 # remove footer by class
 try:
     footer = WebDriverWait(driver, 10).until(
