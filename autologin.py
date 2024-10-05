@@ -77,6 +77,7 @@ try:
 except Exception as e:
     print("The navbar did not become clickable within 10 seconds.")
 
+# remove header by id
 try:
     header = WebDriverWait(driver, 10).until(
         EC.element_to_be_clickable((By.ID, "st-header"))
@@ -84,6 +85,15 @@ try:
     driver.execute_script("arguments[0].style.display = 'none';", header)
 except Exception as e:
     print("The header did not become clickable within 10 seconds.")
+
+# remove footer by class
+try:
+    footer = WebDriverWait(driver, 10).until(
+        EC.element_to_be_clickable((By.CLASS_NAME, "footer"))
+    )
+    driver.execute_script("arguments[0].style.display = 'none';", footer)
+except Exception as e:
+    print("The footer did not become clickable within 10 seconds.")
 
 
 # keep the script running
