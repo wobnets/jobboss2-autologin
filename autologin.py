@@ -68,9 +68,9 @@ try:
 except Exception as e:
     print("The button did not become clickable within 10 seconds.")
 
-# Pause the script to keep the browser open
-# input("Press Enter to close the browser and exit...")
-# driver.quit()
+# hide the header
+navbar = driver.find_element(By.ID, "navbar")
+driver.execute_script("arguments[0].style.display = 'none';", navbar)
 
 
 def signal_handler(sig, frame):
