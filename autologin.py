@@ -77,6 +77,14 @@ try:
 except Exception as e:
     print("The navbar did not become clickable within 10 seconds.")
 
+try:
+    header = WebDriverWait(driver, 10).until(
+        EC.element_to_be_clickable((By.ID, "st-header"))
+    )
+    driver.execute_script("arguments[0].style.display = 'none';", header)
+except Exception as e:
+    print("The header did not become clickable within 10 seconds.")
+
 
 # keep the script running
 def signal_handler(sig, frame):
