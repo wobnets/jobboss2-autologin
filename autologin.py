@@ -103,6 +103,13 @@ try:
 except Exception as e:
     print("The footer did not become clickable within 10 seconds.")
 
+# set main-container to have no padding
+try:
+    main_container = WebDriverWait(driver, 10).until(
+        EC.element_to_be_clickable((By.ID, "main-container"))
+    )
+    driver.execute_script("arguments[0].style.padding = '0';", main_container)
+
 
 # keep the script running
 def signal_handler(sig, frame):
