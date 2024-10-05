@@ -92,12 +92,12 @@ sudo systemctl status jobboss-autologin.service
 
 # Schedule a daily restart at 1 AM with logging
 echo "Scheduling daily restart at 1 AM with logging..."
-(crontab -l 2>/dev/null; echo "0 1 * * * echo \"Restarting system at \$(date)\" >> $LOG_FILE && /sbin/shutdown -r now") | crontab -
+(crontab -l 2>/dev/null; echo "0 1 * * * echo \"Restarting system at \$(date)\" | sudo tee -a $LOG_FILE && /sbin/shutdown -r now") | crontab -
 
 echo "Setup complete. Rebooting now..."
 
 # Log the reboot action
-echo "Rebooting system at $(date)" >> $LOG_FILE
+echo "Rebooting system at $(date)" | sudo tee -a $LOG_FILE
 
 # Reboot the system
 sudo shutdown -r now
