@@ -2,76 +2,93 @@
 
 # Variables
 SERVICE_FILE="/etc/systemd/system/jobboss-autologin.service"
+GETTY_OVERRIDE_DIR="/etc/systemd/system/getty@tty1.service.d"
+GETTY_OVERRIDE_FILE="$GETTY_OVERRIDE_DIR/override.conf"
+XINITRC_FILE="$HOME/.xinitrc"
+ENV_FILE="$HOME/.jobboss_env"
+REPO_DIR="$HOME/jobboss2-autologin"
+AUTLOGIN_SCRIPT="$REPO_DIR/autologin.py"
 
-# Install necessary packages
-echo "Installing necessary packages..."
-sudo apt update
-sudo apt install --no-install-recommends xorg openbox chromium chromium-driver python3-selenium -y
+# Function to install necessary packages
+install_packages() {
+    echo "Installing necessary packages..."
+    sudo apt update
+    sudo apt install --no-install-recommends xorg openbox chromium chromium-driver python3-selenium -y
+}
 
-# Prompt for username and password
-read -p "Enter JobBoss username: " JOBBOSS_USER
-read -sp "Enter JobBoss password: " JOBBOSS_PASSWORD
-echo
+# Function to prompt for credentials and store them
+store_credentials() {
+    read -p "Enter JobBoss username: " JOBBOSS_USER
+    read -sp "Enter JobBoss password: " JOBBOSS_PASSWORD
+    echo
 
-# Store credentials in a file
-echo "export JOBBOSS_USER='$JOBBOSS_USER'" >> ~/.jobboss_env
-echo "export JOBBOSS_PASSWORD='$JOBBOSS_PASSWORD'" >> ~/.jobboss_env
+    echo "Storing credentials..."
+    cat <<EOF > "$ENV_FILE"
+export JOBBOSS_USER='$JOBBOSS_USER'
+export JOBBOSS_PASSWORD='$JOBBOSS_PASSWORD'
+EOF
 
-# Source the environment variables in .bash_profile
-if ! grep -q ". ~/.jobboss_env" ~/.bash_profile; then
-    echo ". ~/.jobboss_env" >> ~/.bash_profile
-fi
+    if ! grep -q ". $ENV_FILE" "$HOME/.bash_profile"; then
+        echo ". $ENV_FILE" >> "$HOME/.bash_profile"
+    fi
+}
 
-# Enable automatic login for the use
-echo "Enabling automatic login..."
-
-# Create the override directory if it doesn't exist
-sudo mkdir -p /etc/systemd/system/getty@tty1.service.d
-
-# Create the override file
-echo "[Service]
+# Function to enable automatic login
+enable_auto_login() {
+    echo "Enabling automatic login..."
+    sudo mkdir -p "$GETTY_OVERRIDE_DIR"
+    cat <<EOF | sudo tee "$GETTY_OVERRIDE_FILE" > /dev/null
+[Service]
 ExecStart=
-ExecStart=-/sbin/agetty --autologin $USER --noclear %I \$TERM" | sudo tee /etc/systemd/system/getty@tty1.service.d/override.conf
+ExecStart=-/sbin/agetty --autologin $USER --noclear %I \$TERM
+EOF
+}
 
-# Create .xinit file
-echo "#!/bin/bash
+# Function to create .xinitrc file
+create_xinitrc() {
+    echo "Creating .xinitrc file..."
+    cat <<EOF > "$XINITRC_FILE"
+#!/bin/bash
 openbox-session &
 sleep 2
-/usr/bin/chromium --kiosk --noerrdialogs --disable-infobars --incognito http://192.168.1.64/jobboss2" | tee ~/.xinitrc
+/usr/bin/chromium --kiosk --noerrdialogs --disable-infobars --incognito http://192.168.1.64/jobboss2
+EOF
+    chmod +x "$XINITRC_FILE"
 
-# Make .xinit file executable
-chmod +x ~/.xinitrc
+    if ! grep -q "startx" "$HOME/.bash_profile"; then
+        echo "if [ -z \"\$DISPLAY\" ] && [ \"\$(tty)\" = \"/dev/tty1\" ]; then
+            startx
+        fi" >> "$HOME/.bash_profile"
+    fi
+}
 
-# Add startx to .bash_profile if not already present
-if ! grep -q "startx" ~/.bash_profile; then
-    echo "if [ -z \"\$DISPLAY\" ] && [ \"\$(tty)\" = \"/dev/tty1\" ]; then
-        startx
-    fi" >> ~/.bash_profile
-fi
-
-# Create the systemd service file
-echo "Creating systemd service file..."
-echo "[Unit]
+# Function to create systemd service
+create_systemd_service() {
+    echo "Creating systemd service file..."
+    cat <<EOF | sudo tee "$SERVICE_FILE" > /dev/null
+[Unit]
 Description=Auto login to jobboss2
 After=network.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/python3 /home/$USER/jobboss2-autologin/autologin.py
+ExecStart=/usr/bin/python3 $AUTLOGIN_SCRIPT
 User=$USER
 Environment=DISPLAY=:0
 
 [Install]
-WantedBy=default.target" | sudo tee $SERVICE_FILE
+WantedBy=default.target
+EOF
 
-# Reload systemd to recognize the new service
-sudo systemctl daemon-reload
+    sudo systemctl daemon-reload
+    sudo systemctl enable jobboss-autologin.service
+    sudo systemctl start jobboss-autologin.service
+    sudo systemctl status jobboss-autologin.service
+}
 
-# Enable the service to start on boot
-sudo systemctl enable jobboss-autologin.service
-
-# Start the service immediately
-sudo systemctl start jobboss-autologin.service
-
-# Check the status of the service
-sudo systemctl status jobboss-autologin.service
+# Main script execution
+install_packages
+store_credentials
+enable_auto_login
+create_xinitrc
+create_systemd_service
