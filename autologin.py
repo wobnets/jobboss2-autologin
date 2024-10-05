@@ -68,9 +68,13 @@ try:
 except Exception as e:
     print("The button did not become clickable within 10 seconds.")
 
-# hide the header
+# wait until the navbar is visible, then hide it, if it is not found within 10 seconds, continue
 navbar = driver.find_element(By.ID, "navbar")
-driver.execute_script("arguments[0].style.display = 'none';", navbar)
+try:
+    wait.until(EC.visibility_of(navbar))
+    driver.execute_script("arguments[0].style.display = 'none';", navbar)
+except Exception as e:
+    print("The navbar was not found within 10 seconds.")
 
 
 def signal_handler(sig, frame):
