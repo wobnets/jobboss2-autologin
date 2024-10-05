@@ -57,7 +57,7 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/python3 /home/$USER/jobbos2-autologin/autologin.py
+ExecStart=/usr/bin/python3 /home/$USER/jobboss2-autologin/autologin.py
 User=$USER
 Environment=DISPLAY=:0
 
