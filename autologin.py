@@ -109,6 +109,8 @@ try:
         EC.element_to_be_clickable((By.ID, "main-container"))
     )
     driver.execute_script("arguments[0].style.padding = '0';", main_container)
+except Exception as e:
+    print("The main-container did not become clickable within 10 seconds.")
 
 
 # keep the script running
