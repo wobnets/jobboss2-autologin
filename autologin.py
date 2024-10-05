@@ -69,14 +69,14 @@ except Exception as e:
     print("The button did not become clickable within 10 seconds.")
 
 # wait until the navbar is visible, then hide it, if it is not found within 10 seconds, continue
-navbar = driver.find_element(By.ID, "navbar")
 try:
-    wait.until(EC.visibility_of(navbar))
+    navbar = WebDriverWait(driver, 10).until(
+        EC.element_to_be_clickable((By.ID, "navbar"))
+    )
     driver.execute_script("arguments[0].style.display = 'none';", navbar)
-except Exception as e:
-    print("The navbar was not found within 10 seconds.")
 
 
+# keep the script running
 def signal_handler(sig, frame):
     print("Signal received, closing browser...")
     driver.quit()
