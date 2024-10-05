@@ -3,6 +3,7 @@
 # Variables
 SERVICE_FILE="/etc/systemd/system/jobboss-autologin.service"
 ENV_FILE="/etc/jobboss2-autologin.env"
+LOG_FILE="/var/log/jobboss2-restart.log"
 
 # Install necessary packages
 echo "Installing necessary packages..."
@@ -88,3 +89,15 @@ sudo systemctl start jobboss-autologin.service
 
 # Check the status of the service
 sudo systemctl status jobboss-autologin.service
+
+# Schedule a daily restart at 1 AM with logging
+echo "Scheduling daily restart at 1 AM with logging..."
+(crontab -l 2>/dev/null; echo "0 1 * * * echo \"Restarting system at \$(date)\" >> $LOG_FILE && /sbin/shutdown -r now") | crontab -
+
+echo "Setup complete. Rebooting now..."
+
+# Log the reboot action
+echo "Rebooting system at $(date)" >> $LOG_FILE
+
+# Reboot the system
+sudo shutdown -r now
