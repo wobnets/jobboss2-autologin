@@ -1,9 +1,16 @@
 #!/bin/bash
 
+set -e  # Exit immediately if a command exits with a non-zero status
+
 # Variables
 SERVICE_FILE="/etc/systemd/system/jobboss-autologin.service"
 ENV_FILE="/etc/jobboss2-autologin.env"
 LOG_FILE="/var/log/jobboss2-restart.log"
+
+# Function to log messages
+log_message() {
+    echo "\$1" | sudo tee -a $LOG_FILE
+}
 
 # Install necessary packages
 echo "Installing necessary packages..."
@@ -79,25 +86,26 @@ WantedBy=default.target
 EOF
 
 # Reload systemd to recognize the new service
+echo "Reloading systemd daemon..."
 sudo systemctl daemon-reload
 
 # Enable the service to start on boot
+echo "Enabling systemd service..."
 sudo systemctl enable jobboss-autologin.service
 
 # Start the service immediately
+echo "Starting systemd service..."
 sudo systemctl start jobboss-autologin.service
 
 # Check the status of the service
-sudo systemctl status jobboss-autologin.service
+echo "Checking systemd service status..."
+sudo systemctl status jobboss-autologin.service --no-pager || true
 
 # Schedule a daily restart at 1 AM with logging
 echo "Scheduling daily restart at 1 AM with logging..."
 (crontab -l 2>/dev/null; echo "0 1 * * * echo \"Restarting system at \$(date)\" | sudo tee -a $LOG_FILE && /sbin/shutdown -r now") | crontab -
 
-echo "Setup complete. Rebooting now..."
-
-# Log the reboot action
-echo "Rebooting system at $(date)" | sudo tee -a $LOG_FILE
+log_message "Setup complete. Rebooting now..."
 
 # Reboot the system
 sudo shutdown -r now
