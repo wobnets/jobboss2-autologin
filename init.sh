@@ -6,6 +6,7 @@ set -e  # Exit immediately if a command exits with a non-zero status
 SERVICE_FILE="/etc/systemd/system/jobboss-autologin.service"
 ENV_FILE="/etc/jobboss2-autologin.env"
 LOG_FILE="/var/log/jobboss2-restart.log"
+AUTOSTART_FILE="$HOME/.config/openbox/autostart"
 
 # Function to log messages
 log_message() {
@@ -63,6 +64,19 @@ if ! grep -q "startx" "$HOME/.bash_profile"; then
     echo "if [ -z \"\$DISPLAY\" ] && [ \"\$(tty)\" = \"/dev/tty1\" ]; then
         startx
     fi" >> "$HOME/.bash_profile"
+fi
+
+# Ensure Openbox autostart file exists
+mkdir -p "$(dirname "$AUTOSTART_FILE")"
+touch "$AUTOSTART_FILE"
+
+# Add xset commands to Openbox autostart
+echo "Configuring display power management settings..."
+if ! grep -q "xset -dpms" "$AUTOSTART_FILE"; then
+    echo "xset -dpms" >> "$AUTOSTART_FILE"
+fi
+if ! grep -q "xset s off" "$AUTOSTART_FILE"; then
+    echo "xset s off" >> "$AUTOSTART_FILE"
 fi
 
 # Create the systemd service file
