@@ -74,6 +74,8 @@ try:
         EC.element_to_be_clickable((By.ID, "navbar"))
     )
     driver.execute_script("arguments[0].style.display = 'none';", navbar)
+except Exception as e:
+    print("The navbar did not become clickable within 10 seconds.")
 
 
 # keep the script running
