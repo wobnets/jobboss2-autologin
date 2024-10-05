@@ -70,6 +70,8 @@ ExecStart=/usr/bin/python3 /home/$USER/jobboss2-autologin/autologin.py
 User=$USER
 Environment=DISPLAY=:0
 EnvironmentFile=$ENV_FILE
+Restart=on-failure
+RestartSec=5s
 
 [Install]
 WantedBy=default.target
