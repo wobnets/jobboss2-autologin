@@ -55,8 +55,6 @@ echo "Creating .xinitrc file..."
 cat <<EOF > "$XINITRC_FILE"
 #!/bin/bash
 openbox-session &
-sleep 2
-/usr/bin/chromium --kiosk --noerrdialogs --disable-infobars --incognito http://192.168.1.64/jobboss2
 EOF
 chmod +x "$XINITRC_FILE"
 
@@ -117,7 +115,7 @@ sudo systemctl status jobboss-autologin.service --no-pager || true
 
 # Schedule a daily restart at 1 AM with logging
 echo "Scheduling daily restart at 1 AM with logging..."
-(crontab -l 2>/dev/null; echo "0 1 * * * echo \"Restarting system at \$(date)\" | sudo tee -a $LOG_FILE && /sbin/shutdown -r now") | crontab -
+(crontab -l 2>/dev/null; echo "0 * * * Sun echo \"Restarting system at \$(date)\" | sudo tee -a $LOG_FILE && /sbin/shutdown -r now") | crontab -
 
 log_message "Setup complete. Rebooting now..."
 
