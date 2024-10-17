@@ -3,10 +3,11 @@
 set -e  # Exit immediately if a command exits with a non-zero status
 
 # Variables
-SERVICE_FILE="/etc/systemd/system/jobboss-autologin.service"
-ENV_FILE="/etc/jobboss2-autologin.env"
-LOG_FILE="/var/log/jobboss2-restart.log"
-AUTOSTART_FILE="$HOME/.config/openbox/autostart"
+SERVICE_FILE="/etc/systemd/system/jobboss2-kiosk.service"
+ENV_FILE="/etc/jobboss2-kiosk.env"
+LOG_FILE="/var/log/jobboss2-kiosk.log"
+EXTENSION_DIR="$HOME/jobboss2-kiosk-browser-extension"
+CONTENT_JS="$EXTENSION_DIR/content.js"
 
 # Function to log messages
 log_message() {
@@ -16,7 +17,7 @@ log_message() {
 # Install necessary packages
 echo "Installing necessary packages..."
 sudo apt update
-sudo apt install --no-install-recommends xorg openbox chromium chromium-driver python3-selenium whiptail -y
+sudo apt install --no-install-recommends xorg openbox chromium whiptail -y
 
 # Prompt for username and password
 JOBBOSS_USER=$(whiptail --inputbox "Enter JobBoss username:" 8 40 --title "Username Input" 3>&1 1>&2 2>&3)
@@ -28,15 +29,10 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# Store credentials in a system-wide environment file
-echo "Storing credentials..."
-sudo bash -c "cat <<EOF > $ENV_FILE
-JOBBOSS_USER='$JOBBOSS_USER'
-JOBBOSS_PASSWORD='$JOBBOSS_PASSWORD'
-EOF"
-
-# Set permissions for the environment file
-sudo chmod 644 $ENV_FILE
+# Replace placeholders with actual credentials
+echo "Updating content.js with credentials..."
+sudo sed -i "s/USERNAME_PLACEHOLDER/$JOBBOSS_USER/g" "$CONTENT_JS"
+sudo sed -i "s/PASSWORD_PLACEHOLDER/$JOBBOSS_PASSWORD/g" "$CONTENT_JS"
 
 # Enable automatic login for the user
 echo "Enabling automatic login..."
@@ -58,12 +54,6 @@ openbox-session &
 EOF
 chmod +x "$XINITRC_FILE"
 
-if ! grep -q "startx" "$HOME/.bash_profile"; then
-    echo "if [ -z \"\$DISPLAY\" ] && [ \"\$(tty)\" = \"/dev/tty1\" ]; then
-        startx
-    fi" >> "$HOME/.bash_profile"
-fi
-
 # Ensure Openbox autostart file exists
 mkdir -p "$(dirname "$AUTOSTART_FILE")"
 touch "$AUTOSTART_FILE"
@@ -84,12 +74,12 @@ cat <<EOF | sudo tee "$SERVICE_FILE" > /dev/null
 Description=Auto login to jobboss2
 After=network.target
 
+
 [Service]
 Type=simple
-ExecStart=/usr/bin/python3 /home/$USER/jobboss2-autologin/autologin.py
+ExecStart=/usr/bin/chromium-browser --load-extension=$EXTENSION_DIR --kiosk http://192.168.1.64/jobboss2
 User=$USER
 Environment=DISPLAY=:0
-EnvironmentFile=$ENV_FILE
 Restart=on-failure
 RestartSec=5s
 
@@ -115,9 +105,12 @@ sudo systemctl status jobboss-autologin.service --no-pager || true
 
 # Schedule a daily restart at 1 AM with logging
 echo "Scheduling daily restart at 1 AM with logging..."
-(crontab -l 2>/dev/null; echo "0 * * * Sun echo \"Restarting system at \$(date)\" | sudo tee -a $LOG_FILE && /sbin/shutdown -r now") | crontab -
+(crontab -l 2>/dev/null; echo "0 1 * * * echo \"Restarting system at \$(date)\" | sudo tee -a $LOG_FILE && /sbin/shutdown -r now") | crontab -
 
 log_message "Setup complete. Rebooting now..."
+
+# Log the reboot action
+echo "Rebooting system at $(date)" | sudo tee -a $LOG_FILE
 
 # Reboot the system
 sudo shutdown -r now
