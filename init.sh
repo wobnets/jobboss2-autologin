@@ -31,10 +31,24 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# Replace placeholders with actual credentials
-echo "Replacing placeholders with actual credentials..."
-sed -i "s/USERNAME_PLACEHOLDER/$JOBBOSS_USER/g" "$CONTENT_JS"
-sed -i "s/PASSWORD_PLACEHOLDER/$JOBBOSS_PASSWORD/g" "$CONTENT_JS"
+# Create the extension directory if it doesn't exist
+mkdir -p "$EXTENSION_DIR"
+
+# Create the content.js file with placeholders
+echo "Creating content.js file..."
+cat <<EOF > "$CONTENT_JS"
+window.addEventListener('load', () => {
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const loginButton = document.getElementById('login');
+
+    if (usernameInput && passwordInput && loginButton) {
+        usernameInput.value = '$JOBBOSS_USER'; // Dynamic value
+        passwordInput.value = '$JOBBOSS_PASSWORD'; // Dynamic value
+        loginButton.click();
+    }
+});
+EOF
 
 # Enable automatic login for the user
 echo "Enabling automatic login..."
@@ -76,12 +90,12 @@ cat <<EOF | sudo tee "$SERVICE_FILE" > /dev/null
 Description=Auto login to jobboss2
 After=network.target
 
-
 [Service]
 Type=simple
 ExecStart=/usr/bin/chromium --no-sandbox --load-extension=$EXTENSION_DIR --kiosk http://192.168.1.64/jobboss2
 User=$USER
 Environment=DISPLAY=:0
+EnvironmentFile=$ENV_FILE
 Restart=on-failure
 RestartSec=5s
 
