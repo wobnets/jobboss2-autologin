@@ -3,7 +3,8 @@
 set -e  # Exit immediately if a command exits with a non-zero status
 
 # Variables
-SERVICE_FILE="/etc/systemd/system/jobboss2-kiosk.service"
+SERVICE_NAME="jobboss2-kiosk.service"
+SERVICE_FILE="/etc/systemd/system/$SERVICE_NAME"
 ENV_FILE="/etc/jobboss2-kiosk.env"
 LOG_FILE="/var/log/jobboss2-kiosk.log"
 EXTENSION_DIR="extension"
@@ -94,15 +95,15 @@ sudo systemctl daemon-reload
 
 # Enable the service to start on boot
 echo "Enabling systemd service..."
-sudo systemctl enable jobboss-autologin.service
+sudo systemctl enable $SERVICE_NAME
 
 # Start the service immediately
 echo "Starting systemd service..."
-sudo systemctl start jobboss-autologin.service
+sudo systemctl start $SERVICE_NAME
 
 # Check the status of the service
 echo "Checking systemd service status..."
-sudo systemctl status jobboss-autologin.service --no-pager || true
+sudo systemctl status $SERVICE_NAME --no-pager || true
 
 # Schedule a daily restart at 1 AM with logging
 echo "Scheduling daily restart at 1 AM with logging..."
