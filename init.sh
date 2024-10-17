@@ -8,6 +8,7 @@ ENV_FILE="/etc/jobboss2-kiosk.env"
 LOG_FILE="/var/log/jobboss2-kiosk.log"
 EXTENSION_DIR="extension"
 CONTENT_JS="$EXTENSION_DIR/content.js"
+AUTOSTART_FILE="$HOME/.config/openbox/autostart"
 
 # Function to log messages
 log_message() {

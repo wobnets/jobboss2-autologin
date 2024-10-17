@@ -1,2 +1,99 @@
 sudo apt-get install chromium xorg openbox
 
+#!/bin/bash
+
+set -e  # Exit immediately if a command exits with a non-zero status
+
+# Variables
+SERVICE_FILE="/etc/systemd/system/chromium-kiosk.service"
+PROFILE_DIR="/home/$USER/chromedriver-profile"
+LOG_FILE="/var/log/jobboss2-restart.log"
+
+# Function to log messages
+log_message() {
+    echo "\$1" | sudo tee -a $LOG_FILE
+}
+
+# Install necessary packages
+echo "Installing necessary packages..."
+sudo apt update
+sudo apt install --no-install-recommends xorg openbox chromium chromium-driver git -y
+
+# Enable automatic login for the user
+echo "Enabling automatic login..."
+GETTY_OVERRIDE_DIR="/etc/systemd/system/getty@tty1.service.d"
+GETTY_OVERRIDE_FILE="$GETTY_OVERRIDE_DIR/override.conf"
+sudo mkdir -p "$GETTY_OVERRIDE_DIR"
+cat <<EOF | sudo tee "$GETTY_OVERRIDE_FILE" > /dev/null
+[Service]
+ExecStart=
+ExecStart=-/sbin/agetty --autologin $USER --noclear %I \$TERM
+EOF
+
+# Create .xinitrc file
+XINITRC_FILE="$HOME/.xinitrc"
+echo "Creating .xinitrc file..."
+cat <<EOF > "$XINITRC_FILE"
+#!/bin/bash
+openbox-session &
+sleep 2
+/usr/bin/chromium-browser --user-data-dir=$PROFILE_DIR --kiosk http://192.168.1.64/jobboss2
+EOF
+chmod +x "$XINITRC_FILE"
+
+# Add startx to .bash_profile if not already present
+if ! grep -q "startx" "$HOME/.bash_profile"; then
+    echo "if [ -z \"\$DISPLAY\" ] && [ \"\$(tty)\" = \"/dev/tty1\" ]; then
+        startx
+    fi" >> "$HOME/.bash_profile"
+fi
+
+# Create the systemd service file
+echo "Creating systemd service file..."
+cat <<EOF | sudo tee "$SERVICE_FILE" > /dev/null
+[Unit]
+Description=Chromium Kiosk
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/chromium-browser --user-data-dir=$PROFILE_DIR --kiosk http://192.168.1.64/jobboss2
+User=$USER
+Environment=DISPLAY=:0
+Restart=always
+RestartSec=5s
+StartLimitBurst=3
+StartLimitInterval=60
+
+[Install]
+WantedBy=graphical.target
+EOF
+
+# Reload systemd to recognize the new service
+echo "Reloading systemd daemon..."
+sudo systemctl daemon-reload
+
+# Enable the service to start on boot
+echo "Enabling systemd service..."
+sudo systemctl enable chromium-kiosk.service
+
+# Start the service immediately
+echo "Starting systemd service..."
+sudo systemctl start chromium-kiosk.service
+
+# Check the status of the service
+echo "Checking systemd service status..."
+sudo systemctl status chromium-kiosk.service --no-pager || true
+
+# Schedule a daily restart at 1 AM with logging
+echo "Scheduling daily restart at 1 AM with logging..."
+(crontab -l 2>/dev/null; echo "0 1 * * * echo \"Restarting system at \$(date)\" | sudo tee -a $LOG_FILE && /sbin/shutdown -r now") | crontab -
+
+echo "Setup complete. Rebooting now..."
+
+# Log the reboot action
+echo "Rebooting system at $(date)" | sudo tee -a $LOG_FILE
+
+# Reboot the system
+sudo shutdown -r now
+
