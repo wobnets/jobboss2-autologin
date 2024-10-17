@@ -6,7 +6,7 @@ set -e  # Exit immediately if a command exits with a non-zero status
 SERVICE_FILE="/etc/systemd/system/jobboss2-kiosk.service"
 ENV_FILE="/etc/jobboss2-kiosk.env"
 LOG_FILE="/var/log/jobboss2-kiosk.log"
-EXTENSION_DIR="$HOME/extension"
+EXTENSION_DIR="extension"
 CONTENT_JS="$EXTENSION_DIR/content.js"
 
 # Function to log messages
