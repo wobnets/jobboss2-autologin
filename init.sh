@@ -32,9 +32,9 @@ if [ $? -ne 0 ]; then
 fi
 
 # Replace placeholders with actual credentials
-echo "Updating content.js with credentials..."
-sudo sed -i "s/USERNAME_PLACEHOLDER/$JOBBOSS_USER/g" "$CONTENT_JS"
-sudo sed -i "s/PASSWORD_PLACEHOLDER/$JOBBOSS_PASSWORD/g" "$CONTENT_JS"
+echo "Replacing placeholders with actual credentials..."
+sed -i "s/USERNAME_PLACEHOLDER/$JOBBOSS_USER/g" "$CONTENT_JS"
+sed -i "s/PASSWORD_PLACEHOLDER/$JOBBOSS_PASSWORD/g" "$CONTENT_JS"
 
 # Enable automatic login for the user
 echo "Enabling automatic login..."
@@ -79,7 +79,7 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/chromium-browser --load-extension=$EXTENSION_DIR --kiosk http://192.168.1.64/jobboss2
+ExecStart=/usr/bin/chromium --no-sandbox --load-extension=$EXTENSION_DIR --kiosk http://192.168.1.64/jobboss2
 User=$USER
 Environment=DISPLAY=:0
 Restart=on-failure
