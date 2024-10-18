@@ -31,9 +31,6 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# Ensure the extension directory exists
-mkdir -p "$EXTENSION_DIR"
-
 # Check if content.js exists
 if [ ! -f "$CONTENT_JS" ]; then
     echo "Error: content.js does not exist in $EXTENSION_DIR."
@@ -88,7 +85,7 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/python3 /home/$USER/jobboss2-autologin/autologin.py
+ExecStart=/usr/bin/chromium --no-sandbox --load-extension=$EXTENSION_DIR --kiosk http://192.168.1.64/jobboss2
 User=$USER
 Environment=DISPLAY=:0
 EnvironmentFile=$ENV_FILE
