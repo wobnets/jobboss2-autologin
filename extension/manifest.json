@@ -3,9 +3,6 @@
   "name": "Auto Login Extension",
   "version": "1.0",
   "permissions": ["activeTab", "scripting", "storage"],
-  "background": {
-    "service_worker": "background.js"
-  },
   "content_scripts": [
     {
       "matches": ["http://192.168.1.64/jobboss2/*"],

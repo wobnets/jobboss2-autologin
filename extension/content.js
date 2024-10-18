@@ -22,20 +22,14 @@ function waitForElement(selector, timeout = 10000) {
 // Main function to perform login and other actions
 async function performLogin() {
   try {
-    const { username, password } = await new Promise((resolve) => {
-      chrome.storage.local.get(['username', 'password'], (result) => {
-        resolve(result);
-      });
-    });
-
     // Wait for the username input to be available
     const usernameInput = await waitForElement('#username');
     const passwordInput = await waitForElement('#password');
     const loginButton = await waitForElement('#login');
 
     // Fill in the username and password
-    usernameInput.value = username;
-    passwordInput.value = password;
+    usernameInput.value = 'USERNAME_PLACEHOLDER'; // Placeholder
+    passwordInput.value = 'PASSWORD_PLACEHOLDER'; // Placeholder
 
     // Click the login button
     loginButton.click();
