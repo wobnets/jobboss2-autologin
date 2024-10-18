@@ -52,6 +52,10 @@ async function performLogin() {
     console.log("Clicking the active session confirmation button...");
     activeSessionYes.click();
 
+    // Hide elements after logging in
+    console.log("Hiding elements after login...");
+    await hideElements();
+
   } catch (error) {
     console.error('Error during login process:', error);
   }
