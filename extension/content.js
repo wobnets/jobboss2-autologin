@@ -23,7 +23,7 @@ function waitForElement(selector, timeout = 10000) {
 async function performLogin() {
   try {
     const { username, password } = await new Promise((resolve) => {
-      chrome.storage.sync.get(['username', 'password'], (result) => {
+      chrome.storage.local.get(['username', 'password'], (result) => {
         resolve(result);
       });
     });
