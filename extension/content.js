@@ -39,8 +39,12 @@ async function performLogin() {
     dataCollectionButton.click();
 
     // Wait for the active session confirmation button and click it
-    const activeSessionYes = await waitForElement('#baseModal > div > div > div.modal-footer > span > button:nth-child(2)', 10000);
-    activeSessionYes.click();
+    try {
+      const activeSessionYes = await waitForElement('#baseModal > div > div > div.modal-footer > span > button:nth-child(2)', 10000);
+      activeSessionYes.click();
+    } catch (error) {
+      console.log("The active session confirmation button did not become clickable within 10 seconds. Continuing...");
+    }
 
   } catch (error) {
     console.error('Error during login process:', error);
