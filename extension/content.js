@@ -101,4 +101,7 @@ async function hideElements() {
 }
 
 // Run the performLogin function when the page loads
-window.addEventListener('load', performLogin);
+window.addEventListener('load', () => {
+  console.log("Page loaded. Starting login process...");
+  performLogin();
+});
