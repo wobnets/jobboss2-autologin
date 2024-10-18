@@ -31,24 +31,19 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# Create the extension directory if it doesn't exist
+# Ensure the extension directory exists
 mkdir -p "$EXTENSION_DIR"
 
-# Create the content.js file with placeholders
-echo "Creating content.js file..."
-cat <<EOF > "$CONTENT_JS"
-window.addEventListener('load', () => {
-    const usernameInput = document.getElementById('username');
-    const passwordInput = document.getElementById('password');
-    const loginButton = document.getElementById('login');
+# Check if content.js exists
+if [ ! -f "$CONTENT_JS" ]; then
+    echo "Error: content.js does not exist in $EXTENSION_DIR."
+    exit 1
+fi
 
-    if (usernameInput && passwordInput && loginButton) {
-        usernameInput.value = '$JOBBOSS_USER'; // Dynamic value
-        passwordInput.value = '$JOBBOSS_PASSWORD'; // Dynamic value
-        loginButton.click();
-    }
-});
-EOF
+# Replace placeholders with actual credentials in content.js
+echo "Updating content.js with credentials..."
+sudo sed -i "s/USERNAME_PLACEHOLDER/$JOBBOSS_USER/g" "$CONTENT_JS"
+sudo sed -i "s/PASSWORD_PLACEHOLDER/$JOBBOSS_PASSWORD/g" "$CONTENT_JS"
 
 # Enable automatic login for the user
 echo "Enabling automatic login..."
@@ -71,6 +66,7 @@ EOF
 chmod +x "$XINITRC_FILE"
 
 # Ensure Openbox autostart file exists
+AUTOSTART_FILE="$HOME/.config/openbox/autostart"
 mkdir -p "$(dirname "$AUTOSTART_FILE")"
 touch "$AUTOSTART_FILE"
 
@@ -92,7 +88,7 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/chromium --no-sandbox --load-extension=$EXTENSION_DIR --kiosk http://192.168.1.64/jobboss2
+ExecStart=/usr/bin/python3 /home/$USER/jobboss2-autologin/autologin.py
 User=$USER
 Environment=DISPLAY=:0
 EnvironmentFile=$ENV_FILE
