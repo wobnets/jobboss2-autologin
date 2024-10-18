@@ -8,7 +8,7 @@ SERVICE_FILE="/etc/systemd/system/$SERVICE_NAME"
 ENV_FILE="/etc/jobboss2-kiosk.env"
 LOG_FILE="/var/log/jobboss2-kiosk.log"
 EXTENSION_DIR="$HOME/jobboss2-autologin/extension"
-CONTENT_JS="$EXTENSION_DIR/content.js"
+BACKGROUND_JS="$EXTENSION_DIR/background.js"
 AUTOSTART_FILE="$HOME/.config/openbox/autostart"
 
 # Function to log messages
@@ -31,16 +31,10 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# Check if content.js exists
-if [ ! -f "$CONTENT_JS" ]; then
-    echo "Error: content.js does not exist in $EXTENSION_DIR."
-    exit 1
-fi
-
-# Replace placeholders with actual credentials in content.js
-echo "Updating content.js with credentials..."
-sudo sed -i "s/USERNAME_PLACEHOLDER/$JOBBOSS_USER/g" "$CONTENT_JS"
-sudo sed -i "s/PASSWORD_PLACEHOLDER/$JOBBOSS_PASSWORD/g" "$CONTENT_JS"
+# Replace placeholders with actual credentials in background.js
+echo "Updating background.js with credentials..."
+sudo sed -i "s/USERNAME_PLACEHOLDER/$JOBBOSS_USER/g" "$BACKGROUND_JS"
+sudo sed -i "s/PASSWORD_PLACEHOLDER/$JOBBOSS_PASSWORD/g" "$BACKGROUND_JS"
 
 # Enable automatic login for the user
 echo "Enabling automatic login..."
