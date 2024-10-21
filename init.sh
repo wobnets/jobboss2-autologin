@@ -78,27 +78,6 @@ fi
 # add chromium launch line to autostart
 echo "/usr/bin/chromium http://192.168.1.64/jobboss2/t1/DataCollection --load-extension=$EXTENSION_DIR --kiosk & disown" >> "$AUTOSTART_FILE"
 
-
-# Create the systemd service file
-echo "Creating systemd service file..."
-cat <<EOF | sudo tee "$SERVICE_FILE" > /dev/null
-[Unit]
-Description=Auto login to jobboss2
-After=network.target
-
-[Service]
-Type=simple
-ExecStart=/usr/bin/chromium http://192.168.1.64/jobboss2/t1/DataCollection --load-extension=$EXTENSION_DIR --kiosk & disown
-User=$USER
-Environment=DISPLAY=:0
-EnvironmentFile=$ENV_FILE
-Restart=on-failure
-RestartSec=5s
-
-[Install]
-WantedBy=default.target
-EOF
-
 # Reload systemd to recognize the new service
 echo "Reloading systemd daemon..."
 sudo systemctl daemon-reload
