@@ -18,10 +18,6 @@ window.addEventListener("load", function() {
 
   const observeDataCollection = () => {
     if (dataCollectionIcon) {
-      const terminalNumber = document.getElementById("terminal");
-      if (terminalNumber) {
-        terminalNumber.value = "70"; // Set terminal number
-      }
 
       const dataCollectionBtn = dataCollectionIcon.querySelector("a");
       if (dataCollectionBtn) {
