@@ -47,6 +47,12 @@ ExecStart=
 ExecStart=-/sbin/agetty --autologin $USER --noclear %I \$TERM
 EOF
 
+# Add startx to .bash_profile
+BASH_PROFILE="$HOME/.bash_profile"
+if ! grep -q "startx" "$BASH_PROFILE"; then
+    echo 'if [[ -z $DISPLAY ]] && [[ $(tty) = /dev/tty1 ]]; then exec startx; fi' >> "$BASH_PROFILE"
+fi
+
 # Create .xinitrc file
 XINITRC_FILE="$HOME/.xinitrc"
 echo "Creating .xinitrc file..."
@@ -69,6 +75,9 @@ fi
 if ! grep -q "xset s off" "$AUTOSTART_FILE"; then
     echo "xset s off" >> "$AUTOSTART_FILE"
 fi
+# add chromium launch line to autostart
+echo "/usr/bin/chromium http://192.168.1.64/jobboss2/t1/DataCollection --load-extension=$EXTENSION_DIR --kiosk & disown" >> "$AUTOSTART_FILE"
+
 
 # Create the systemd service file
 echo "Creating systemd service file..."
