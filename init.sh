@@ -52,7 +52,7 @@ XINITRC_FILE="$HOME/.xinitrc"
 echo "Creating .xinitrc file..."
 cat <<EOF > "$XINITRC_FILE"
 #!/bin/bash
-openbox-session &
+exec openbox-session
 EOF
 chmod +x "$XINITRC_FILE"
 
