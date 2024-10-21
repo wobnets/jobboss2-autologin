@@ -78,22 +78,6 @@ fi
 # add chromium launch line to autostart
 echo "/usr/bin/chromium http://192.168.1.64/jobboss2/t1/DataCollection --load-extension=$EXTENSION_DIR --kiosk & disown" >> "$AUTOSTART_FILE"
 
-# Reload systemd to recognize the new service
-echo "Reloading systemd daemon..."
-sudo systemctl daemon-reload
-
-# Enable the service to start on boot
-echo "Enabling systemd service..."
-sudo systemctl enable $SERVICE_NAME
-
-# Start the service immediately
-echo "Starting systemd service..."
-sudo systemctl start $SERVICE_NAME
-
-# Check the status of the service
-echo "Checking systemd service status..."
-sudo systemctl status $SERVICE_NAME --no-pager || true
-
 # Schedule a daily restart at 1 AM with logging
 echo "Scheduling daily restart at 1 AM with logging..."
 (crontab -l 2>/dev/null; echo "0 1 * * * echo \"Restarting system at \$(date)\" | sudo tee -a $LOG_FILE && /sbin/shutdown -r now") | crontab -
