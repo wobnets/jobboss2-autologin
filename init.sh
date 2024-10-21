@@ -79,7 +79,7 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/chromium --no-sandbox --load-extension=$EXTENSION_DIR --kiosk http://192.168.1.64/jobboss2
+ExecStart=/usr/bin/chromium http://192.168.1.64/jobboss2/t1/DataCollection --load-extension=$EXTENSION_DIR --kiosk & disown
 User=$USER
 Environment=DISPLAY=:0
 EnvironmentFile=$ENV_FILE

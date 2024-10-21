@@ -1,6 +1,6 @@
 // Auto Login JobBoss2
-const username = "shop5"; // Replace with your username
-const password = "floor123"; // Replace with your password
+const username = "USERNAME_PLACEHOLDER";
+const password = "PASSWORD_PLACEHOLDER";
 const timeout = 1000; // Polling interval
 
 window.addEventListener("load", function() {
