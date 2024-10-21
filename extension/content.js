@@ -6,6 +6,11 @@ const timeout = 1000; // Polling interval
 window.addEventListener("load", function() {
   console.log("Window loaded");
 
+  // Check if the current URL includes "DataCollection"
+  if (window.location.href.includes("DataCollection")) {
+    removeBars();
+  }
+
   const usernameField = document.getElementById("username");
   const passwordField = document.getElementById("password");
   const loginButton = document.getElementById("login");
@@ -57,3 +62,24 @@ window.addEventListener("load", function() {
   // Start the login process after a short delay
   setTimeout(login, timeout);
 });
+
+// Function to remove bars
+function removeBars() {
+  console.log("Removing top and bottom bars...");
+  const topBar = document.getElementById("navbar");
+  const bottomBar = document.getElementsByClassName("footer")[0];
+  const mainContainer = document.getElementById("main-container");
+
+  if (topBar) {
+    topBar.style.display = "none";
+    console.log("Top bar removed.");
+  }
+  if (bottomBar) {
+    bottomBar.style.display = "none";
+    console.log("Bottom bar removed.");
+  }
+  if (mainContainer) {
+    mainContainer.style.paddingTop = "0";
+    console.log("Main container padding adjusted.");
+  }
+}
